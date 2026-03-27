@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Member</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 16px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.4em;
+        }
+        .header .breadcrumb {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .header .breadcrumb a {
+            color: #2a4d7a;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 4px;
+        }
+        .header .breadcrumb a:hover { color: #18325a; }
+        .form-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .form-section { margin-bottom: 28px; }
+        .form-section h3 {
+            color: #2a4d7a;
+            font-size: 0.95em;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-row.full { grid-template-columns: 1fr; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .form-group input,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #bfc9d1;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+            background: #fff;
+            color: #222;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2a4d7a;
+            box-shadow: 0 0 0 3px rgba(42, 77, 122, 0.1);
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e8ecf1;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-save {
+            background: #2a4d7a;
+            color: #fff;
+        }
+        .btn-save:hover { background: #18325a; }
+        .btn-cancel {
+            background: #e8ecf1;
+            color: #555;
+        }
+        .btn-cancel:hover { background: #d8dde5; }
+        .help-text {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .container { padding: 20px 12px; }
+            .form-card { padding: 16px; }
+            .header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Create New Member</h1>
+                <div class="breadcrumb">
+                    <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+        <div class="form-card">
+            {% if error_message %}
+                <div style="color: #c0392b; margin-bottom: 18px; font-weight: bold;">{{ error_message }}</div>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h3>Basic Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" name="name" value="{{ form_data.name|default:'' }}" required>
+                        </div>
+                    </div>
+                </div>
+                <!-- Contact Information -->
+                <div class="form-section">
+                    <h3>Contact Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">Mobile No. (Primary)</label>
+                            <input type="text" id="phone" name="phone" value="{{ form_data.phone|default:'' }}" required>
+                            <span class="help-text">10-digit phone number</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="alternate_phone">Mobile No. (Alternate)</label>
+                            <input type="text" id="alternate_phone" name="alternate_phone" value="{{ form_data.alternate_phone|default:'' }}">
+                            <span class="help-text">Optional</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="{{ form_data.email|default:'' }}">
+                            <span class="help-text">Optional</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Address & ID -->
+                <div class="form-section">
+                    <h3>Address & Identification</h3>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" required>{{ form_data.address|default:'' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="aadhar_number">Aadhar Number</label>
+                            <input type="text" id="aadhar_number" name="aadhar_number" value="{{ form_data.aadhar_number|default:'' }}" required>
+                            <span class="help-text">12-digit unique identifier</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Status -->
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="is_active">Active</label>
+                            <input type="checkbox" id="is_active" name="is_active" {% if form_data.is_active|default:'on' == 'on' %}checked{% endif %}>
+                        </div>
+                    </div>
+                </div>
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-save">➕ Create Member</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

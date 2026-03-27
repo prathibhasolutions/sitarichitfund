@@ -363,6 +363,7 @@
         <div class="sidebar-header">Sitari Chit Fund</div>
         <div class="sidebar-action">
             <a href="{% url 'create_group' %}">+ New Chit Group</a>
+            <a href="{% url 'create_member' %}" style="margin-top: 10px; display: block;">+ New Member</a>
         </div>
         <div class="sidebar-label">Chit Groups</div>
         <ul class="group-list">
@@ -447,7 +448,7 @@
                         {% endfor %}
                     </tr>
                     <tr>
-                        <th>Lift Amount</th>
+                        <th>Disbursed Amount</th>
                         {% for item in members_data %}
                         <td{% if item.is_lifted %} style="background:#ff0000;color:#fff;"{% endif %}>{% if item.is_lifted %}₹{{ item.lift_amount }}{% else %}-{% endif %}</td>
                         {% endfor %}
@@ -550,7 +551,7 @@
                         <th>SL. No</th>
                         <th>Date</th>
                         <th>Lift Member</th>
-                        <th>Lift Amount</th>
+                        <th>Disbursed Amount</th>
                         <th>Surety Details</th>
                         <th>Disbursed Date</th>
                         <th>Disbursement Mode</th>
@@ -587,7 +588,7 @@
                                 {% endfor %}
                             </select>
                         </td>
-                        <td><input type="number" step="0.01" name="lift_amount" placeholder="Lift amount"></td>
+                        <td><input type="number" step="0.01" name="lift_amount" placeholder="Disbursed amount"></td>
                         <td><input type="text" name="surety_details" placeholder="Surety details"></td>
                         <td><input type="date" name="disbursed_date"></td>
                         <td>

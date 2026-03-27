@@ -9,6 +9,45 @@ from django.db import models as db_models
 from .models import ChitGroup, ChitRound, ChitMembership, Payment, Member, RoundSchedule
 
 
+def create_member(request):
+    error_message = None
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        alternate_phone = request.POST.get('alternate_phone', '').strip()
+        email = request.POST.get('email', '').strip()
+        address = request.POST.get('address', '').strip()
+        aadhar_number = request.POST.get('aadhar_number', '').strip()
+        is_active = request.POST.get('is_active', 'on') == 'on'
+        # Validate required fields
+        if not name or not phone or not address or not aadhar_number:
+            error_message = 'Please fill all required fields.'
+        elif len(phone) != 10 or not phone.isdigit():
+            error_message = 'Enter a valid 10-digit phone number.'
+        elif alternate_phone and (len(alternate_phone) != 10 or not alternate_phone.isdigit()):
+            error_message = 'Enter a valid 10-digit alternate phone number.'
+        elif len(aadhar_number) != 12 or not aadhar_number.isdigit():
+            error_message = 'Enter a valid 12-digit Aadhar number.'
+        else:
+            try:
+                member = Member.objects.create(
+                    name=name,
+                    phone=phone,
+                    alternate_phone=alternate_phone or None,
+                    email=email or None,
+                    address=address,
+                    aadhar_number=aadhar_number,
+                    is_active=is_active,
+                )
+                return redirect('dashboard')
+            except Exception as e:
+                error_message = str(e)
+    return render(request, 'management/create_member.html', {
+        'error_message': error_message,
+        'form_data': request.POST if request.method == 'POST' else {},
+    })
+
+
 def add_months(base_date, months_to_add):
     month_index = (base_date.month - 1) + months_to_add
     year = base_date.year + (month_index // 12)
