@@ -43,7 +43,7 @@ sudo apt install -y python3 python3-venv python3-pip python3-dev nginx git curl 
 5) CLONE REPO AND SETUP VENV
 ====================================================
 cd /home/ubuntu
-git clone YOUR_GIT_REPO_URL sitarichitfund
+git clone https://github.com/prathibhasolutions/sitarichitfund.git sitarichitfund
 cd /home/ubuntu/sitarichitfund
 python3 -m venv venv
 source venv/bin/activate
@@ -209,7 +209,7 @@ sudo systemctl restart nginx
 ====================================================
 14) ENABLE SSL (HTTPS)
 ====================================================
-sudo certbot --nginx -d chits.sitarisolutions.in -d www.chits.sitarisolutions.in -m YOUR_EMAIL --agree-tos --no-eff-email --redirect
+sudo certbot --nginx -d chits.sitarisolutions.in -d www.chits.sitarisolutions.in 
 sudo certbot renew --dry-run
 
 ====================================================
