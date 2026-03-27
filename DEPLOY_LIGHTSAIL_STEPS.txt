@@ -1,0 +1,237 @@
+AWS LIGHTSAIL DEPLOYMENT STEPS (DJANGO)
+Project: sitarichitfund
+
+IMPORTANT: Replace these placeholders first:
+- 3.6.37.113
+- chits.sitarisolutions.in
+- www.chits.sitarisolutions.in
+- YOUR_EMAIL
+- YOUR_GIT_REPO_URL
+
+====================================================
+1) LOCAL MACHINE: PUSH LATEST CODE
+====================================================
+cd C:\Users\User\Documents\GitHub\sitarichitfund
+git add .
+git commit -m "prepare production deploy"
+git push origin main
+
+====================================================
+2) CREATE LIGHTSAIL INSTANCE (CONSOLE)
+====================================================
+- Create Ubuntu LTS instance.
+- Attach a Static IP.
+- In Lightsail Networking firewall, open:
+  - 22 (SSH)
+  - 80 (HTTP)
+  - 443 (HTTPS)
+  - (Optional temporary) 8000 for direct gunicorn test only
+
+====================================================
+3) SSH TO SERVER
+====================================================
+ssh ubuntu@3.6.37.113
+
+====================================================
+4) INSTALL PACKAGES
+====================================================
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y python3 python3-venv python3-pip python3-dev nginx git curl ufw certbot python3-certbot-nginx
+
+====================================================
+5) CLONE REPO AND SETUP VENV
+====================================================
+cd /home/ubuntu
+git clone YOUR_GIT_REPO_URL sitarichitfund
+cd /home/ubuntu/sitarichitfund
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install gunicorn
+
+====================================================
+6) PRODUCTION DJANGO SETTINGS
+====================================================
+nano /home/ubuntu/sitarichitfund/project/settings.py
+
+Make sure these exist/are set:
+DEBUG = False
+
+ALLOWED_HOSTS = [
+    "3.6.37.113",
+    "chits.sitarisolutions.in",
+    "www.chits.sitarisolutions.in",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://chits.sitarisolutions.in",
+    "https://www.chits.sitarisolutions.in",
+]
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+Save and exit.
+
+====================================================
+7) MIGRATE + STATIC + SUPERUSER
+====================================================
+cd /home/ubuntu/sitarichitfund
+source venv/bin/activate
+python manage.py migrate
+python manage.py collectstatic --noinput
+python manage.py createsuperuser
+
+====================================================
+8) TEST GUNICORN (OPTIONAL)
+====================================================
+cd /home/ubuntu/sitarichitfund
+source venv/bin/activate
+gunicorn --workers 3 --bind 0.0.0.0:8000 project.wsgi:application
+
+Open in browser:
+http://3.6.37.113:8000
+
+If timeout, open port 8000 in Lightsail firewall, then test again.
+Stop test with Ctrl+C.
+
+====================================================
+9) CREATE SYSTEMD SERVICE FOR GUNICORN
+====================================================
+sudo nano /etc/systemd/system/sitarichitfund.service
+
+Paste this:
+
+[Unit]
+Description=Gunicorn daemon for sitarichitfund
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/sitarichitfund
+Environment="PATH=/home/ubuntu/sitarichitfund/venv/bin"
+ExecStart=/home/ubuntu/sitarichitfund/venv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ubuntu/sitarichitfund/gunicorn.sock project.wsgi:application
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+Then run:
+
+sudo systemctl daemon-reload
+sudo systemctl enable sitarichitfund
+sudo systemctl restart sitarichitfund
+sudo systemctl status sitarichitfund --no-pager
+
+====================================================
+10) CONFIGURE NGINX
+====================================================
+sudo nano /etc/nginx/sites-available/sitarichitfund
+
+Paste this:
+
+server {
+    listen 80;
+    server_name 3.6.37.113 chits.sitarisolutions.in www.chits.sitarisolutions.in;
+
+    client_max_body_size 20M;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        alias /home/ubuntu/sitarichitfund/staticfiles/;
+    }
+
+    location /media/ {
+        alias /home/ubuntu/sitarichitfund/media/;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/home/ubuntu/sitarichitfund/gunicorn.sock;
+    }
+}
+
+Enable and restart:
+
+sudo ln -sf /etc/nginx/sites-available/sitarichitfund /etc/nginx/sites-enabled/sitarichitfund
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl status nginx --no-pager
+
+====================================================
+11) UFW FIREWALL (OPTIONAL IF USING ONLY LIGHTSAIL FIREWALL)
+====================================================
+sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw --force enable
+sudo ufw status
+
+If you opened 8000 only for testing, remove it after setup:
+sudo ufw delete allow 8000
+
+====================================================
+12) DNS SETUP (DOMAIN PROVIDER, E.G., GODADDY)
+====================================================
+Add A records:
+- Host: @   -> 3.6.37.113
+- Host: www -> 3.6.37.113
+
+If using subdomain (example api):
+- Host: api -> 3.6.37.113
+
+Wait for DNS propagation.
+
+Verify from server:
+dig +short chits.sitarisolutions.in
+dig +short www.chits.sitarisolutions.in
+
+====================================================
+13) FINAL DOMAIN CONFIG CHECK
+====================================================
+If needed, re-open settings and nginx and confirm domain names:
+
+nano /home/ubuntu/sitarichitfund/project/settings.py
+sudo nano /etc/nginx/sites-available/sitarichitfund
+
+Restart services:
+sudo systemctl restart sitarichitfund
+sudo nginx -t
+sudo systemctl restart nginx
+
+====================================================
+14) ENABLE SSL (HTTPS)
+====================================================
+sudo certbot --nginx -d chits.sitarisolutions.in -d www.chits.sitarisolutions.in -m YOUR_EMAIL --agree-tos --no-eff-email --redirect
+sudo certbot renew --dry-run
+
+====================================================
+15) UPDATE DEPLOY STEPS (FUTURE)
+====================================================
+cd /home/ubuntu/sitarichitfund
+git pull origin main
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py collectstatic --noinput
+sudo systemctl restart sitarichitfund
+sudo systemctl restart nginx
+
+====================================================
+16) TROUBLESHOOTING COMMANDS
+====================================================
+sudo systemctl status sitarichitfund --no-pager
+sudo systemctl status nginx --no-pager
+sudo journalctl -u sitarichitfund -f
+sudo tail -f /var/log/nginx/error.log
+
+Quick checks:
+curl -I http://chits.sitarisolutions.in
+curl -I https://chits.sitarisolutions.in
