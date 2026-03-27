@@ -27,10 +27,16 @@ class ChitMembershipInline(admin.TabularInline):
 
 @admin.register(ChitGroup)
 class ChitGroupAdmin(admin.ModelAdmin):
-    list_display = ['name', 'total_members', 'installment_amount', 'prize_amount', 'frequency_months', 'start_date', 'status']
+    list_display = ['name', 'total_members', 'installment_amount', 'prize_amount', 'frequency_months', 'start_date', 'status', 'print_link']
     search_fields = ['name']
     list_filter = ['status', 'frequency_months']
     inlines = [RoundScheduleInline, ChitMembershipInline]
+
+    def print_link(self, obj):
+        from django.utils.html import format_html
+        url = f"/management/group/{obj.id}/print/"
+        return format_html('<a href="{}" target="_blank">🖨️ Print/Download</a>', url)
+    print_link.short_description = 'Print'
 
 
 class PaymentInline(admin.TabularInline):
@@ -41,7 +47,7 @@ class PaymentInline(admin.TabularInline):
 
 @admin.register(ChitRound)
 class ChitRoundAdmin(admin.ModelAdmin):
-    list_display = ['chit_group', 'round_number', 'round_date', 'winner', 'winner_installment_amount', 'others_installment_amount', 'prize_amount', 'status']
+    list_display = ['chit_group', 'round_number', 'round_date', 'winner', 'status']
     search_fields = ['chit_group__name']
     list_filter = ['status', 'chit_group']
     inlines = [PaymentInline]

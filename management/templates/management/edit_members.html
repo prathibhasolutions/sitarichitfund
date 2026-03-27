@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Members - {{ group.name }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 16px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.6em;
+        }
+        .header a {
+            color: #2a4d7a;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        .header a:hover {
+            color: #18325a;
+        }
+
+        .members-list {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8ecf1;
+            transition: background-color 0.15s;
+        }
+        .member-item:last-child {
+            border-bottom: none;
+        }
+        .member-item:hover {
+            background-color: #f7f9fc;
+        }
+
+        .member-info {
+            flex: 1;
+        }
+        .member-name {
+            font-size: 1em;
+            font-weight: 600;
+            color: #1a2e4a;
+            margin-bottom: 4px;
+        }
+        .member-details {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .member-slot {
+            display: inline-block;
+            background: #e3eafc;
+            color: #2a4d7a;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .member-action {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-edit {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85em;
+            transition: background-color 0.15s;
+        }
+        .btn-edit:hover {
+            background: #18325a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header a {
+                margin-top: 12px;
+            }
+            .member-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .member-action {
+                margin-top: 12px;
+                width: 100%;
+            }
+            .btn-edit {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edit Members - {{ group.name }}</h1>
+            <a href="{% url 'dashboard_group' group.id %}">← Back to Dashboard</a>
+        </div>
+
+        {% if memberships %}
+        <div class="members-list">
+            {% for membership in memberships %}
+            <div class="member-item">
+                <div class="member-info">
+                    <div class="member-name">
+                        <span class="member-slot">Slot {{ membership.slot_number }}</span>
+                        {{ membership.member.name }}
+                    </div>
+                    <div class="member-details">
+                        📱 {{ membership.member.phone }} {% if membership.member.alternate_phone %} | {{ membership.member.alternate_phone }}{% endif %}<br>
+                        🆔 {{ membership.member.aadhar_number }} {% if membership.member.email %} | {{ membership.member.email }}{% endif %}
+                    </div>
+                </div>
+                <div class="member-action">
+                    <a href="{% url 'edit_member' group.id membership.id %}" class="btn-edit">✏️ Edit</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No members in this group yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

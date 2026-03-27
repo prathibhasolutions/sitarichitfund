@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Round {{ chit_round.round_number }} - {{ group.name }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 16px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.4em;
+        }
+        .header .breadcrumb {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .header .breadcrumb a {
+            color: #2a4d7a;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 4px;
+        }
+        .header .breadcrumb a:hover {
+            color: #18325a;
+        }
+
+        .form-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .form-section {
+            margin-bottom: 28px;
+        }
+        .form-section h3 {
+            color: #2a4d7a;
+            font-size: 0.95em;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #bfc9d1;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+            background: #fff;
+            color: #222;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2a4d7a;
+            box-shadow: 0 0 0 3px rgba(42, 77, 122, 0.1);
+        }
+
+        .round-badge {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e8ecf1;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-save {
+            background: #2a4d7a;
+            color: #fff;
+        }
+        .btn-save:hover {
+            background: #18325a;
+        }
+        .btn-cancel {
+            background: #e8ecf1;
+            color: #555;
+        }
+        .btn-cancel:hover {
+            background: #d8dde5;
+        }
+
+        .help-text {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .file-current {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 6px;
+            padding: 6px;
+            background: #f5f7fb;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px 12px;
+            }
+            .form-card {
+                padding: 16px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Edit Round Details</h1>
+                <div class="breadcrumb">
+                    <a href="{% url 'edit_rounds' group.id %}">← Back to Rounds</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="round-badge">Round {{ chit_round.round_number }} | {{ group.name }}</div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Date & Winner -->
+                <div class="form-section">
+                    <h3>Round Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="round_date">Round Date</label>
+                            <input type="date" id="round_date" name="round_date" value="{{ chit_round.round_date }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="pending" {% if chit_round.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="completed" {% if chit_round.status == 'completed' %}selected{% endif %}>Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="winner">Lift Member (Winner)</label>
+                            <select id="winner" name="winner">
+                                <option value="">-- Select --</option>
+                                {% for m in memberships %}
+                                <option value="{{ m.id }}" {% if chit_round.winner.id == m.id %}selected{% endif %}>
+                                    Slot {{ m.slot_number }} - {{ m.member.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <span class="help-text">Select the member who won this round's lift</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="lift_amount">Lift Amount (₹)</label>
+                            <input type="number" id="lift_amount" name="lift_amount" step="0.01" value="{{ chit_round.lift_amount|default:'' }}">
+                            <span class="help-text">Amount given to the lifted member</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Surety & Disbursement -->
+                <div class="form-section">
+                    <h3>Surety & Disbursement</h3>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="surety_details">Surety Details</label>
+                            <textarea id="surety_details" name="surety_details">{{ chit_round.surety_details|default:'' }}</textarea>
+                            <span class="help-text">Surety or guarantor details for this round</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="disbursed_date">Disbursed Date</label>
+                            <input type="date" id="disbursed_date" name="disbursed_date" value="{{ chit_round.disbursed_date|default:'' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="disbursement_mode">Disbursement Mode</label>
+                            <select id="disbursement_mode" name="disbursement_mode">
+                                <option value="">-- Select --</option>
+                                <option value="cash" {% if chit_round.disbursement_mode == 'cash' %}selected{% endif %}>Cash</option>
+                                <option value="bank" {% if chit_round.disbursement_mode == 'bank' %}selected{% endif %}>Bank Transfer</option>
+                                <option value="upi" {% if chit_round.disbursement_mode == 'upi' %}selected{% endif %}>UPI</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document & Remarks -->
+                <div class="form-section">
+                    <h3>Additional Information</h3>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="document">Document (PDF/Image)</label>
+                            <input type="file" id="document" name="document" accept=".pdf,.jpg,.jpeg,.png">
+                            {% if chit_round.document %}
+                            <div class="file-current">
+                                📄 Current: <a href="{{ chit_round.document.url }}" target="_blank">{{ chit_round.document.name|truncatechars:40 }}</a>
+                                <br><span style="font-size: 0.9em;">Upload a new file to replace</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="remarks">Remarks</label>
+                            <textarea id="remarks" name="remarks">{{ chit_round.remarks|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-save">💾 Save Changes</button>
+                    <a href="{% url 'edit_rounds' group.id %}" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

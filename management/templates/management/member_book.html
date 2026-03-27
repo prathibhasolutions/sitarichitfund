@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ member.name }} - Book</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+            padding: 24px;
+        }
+        .toolbar {
+            margin-bottom: 16px;
+        }
+        .btn {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            margin-right: 8px;
+        }
+        .btn.secondary {
+            background: #64748b;
+        }
+        .sheet {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 2px solid #2a4d7a;
+            padding-bottom: 14px;
+            margin-bottom: 18px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.5em;
+            margin-bottom: 4px;
+        }
+        .subtle {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .detail-card {
+            background: #f7f9fc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+        .detail-label {
+            font-size: 0.74em;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #777;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+        .detail-value {
+            font-size: 0.96em;
+            color: #1f2937;
+            font-weight: 600;
+            word-break: break-word;
+        }
+        .section-title {
+            color: #2a4d7a;
+            font-size: 1.05em;
+            margin: 18px 0 10px;
+        }
+        .lift-summary {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        thead tr {
+            background: #2a4d7a;
+            color: #fff;
+        }
+        th, td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e8ecf1;
+            text-align: left;
+            vertical-align: top;
+        }
+        tbody tr:nth-child(even) {
+            background: #f7f9fc;
+        }
+        .payment-line {
+            margin-bottom: 3px;
+            color: #475569;
+        }
+        .amount-strong {
+            font-weight: 700;
+            color: #1a2e4a;
+        }
+        .empty {
+            color: #94a3b8;
+            font-style: italic;
+        }
+        @media print {
+            @page { size: A4 landscape; margin: 10mm; }
+            body { background: #fff; padding: 0; }
+            .toolbar { display: none; }
+            .sheet { box-shadow: none; border-radius: 0; max-width: none; padding: 0; }
+            thead tr { background: #2a4d7a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+        @media (max-width: 820px) {
+            .detail-grid { grid-template-columns: 1fr; }
+            .lift-summary { grid-template-columns: 1fr; }
+            .header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+        <a href="javascript:window.close();" class="btn secondary">Close</a>
+    </div>
+
+    <div class="sheet">
+        <div class="header">
+            <div>
+                <h1>{{ member.name }} - Chit Book</h1>
+                <div class="subtle">{{ group.name }} | Slot {{ membership.slot_number }}</div>
+            </div>
+            <div class="subtle" style="text-align:right;">
+                {% if winner_round %}Lifted in Round {{ winner_round.round_number }}{% else %}Not lifted yet{% endif %}
+            </div>
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-card">
+                <div class="detail-label">Mobile No.</div>
+                <div class="detail-value">{{ member.phone|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Aadhar No.</div>
+                <div class="detail-value">{{ member.aadhar_number|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Total Paid</div>
+                <div class="detail-value">Rs {{ total_paid }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Email</div>
+                <div class="detail-value">{{ member.email|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Alternate Phone</div>
+                <div class="detail-value">{{ member.alternate_phone|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Address</div>
+                <div class="detail-value">{{ member.address|default:'-' }}</div>
+            </div>
+        </div>
+
+        <div class="section-title">Lift Details</div>
+        {% if winner_round %}
+        <div class="lift-summary">
+            <div class="detail-card">
+                <div class="detail-label">Lifted In Round</div>
+                <div class="detail-value">Round {{ winner_round.round_number }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Lift Amount</div>
+                <div class="detail-value">Rs {{ winner_round.lift_amount|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Round Date</div>
+                <div class="detail-value">{{ winner_round.round_date|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">{{ winner_round.get_status_display }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Disbursed Date</div>
+                <div class="detail-value">{{ winner_round.disbursed_date|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Disbursement Mode</div>
+                <div class="detail-value">{{ winner_round.get_disbursement_mode_display|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Surety Details</div>
+                <div class="detail-value">{{ winner_round.surety_details|default:'-' }}</div>
+            </div>
+            <div class="detail-card">
+                <div class="detail-label">Remarks</div>
+                <div class="detail-value">{{ winner_round.remarks|default:'-' }}</div>
+            </div>
+        </div>
+        {% if winner_round.document %}
+        <div class="detail-card" style="margin-bottom:20px;">
+            <div class="detail-label">Document</div>
+            <div class="detail-value"><a href="{{ winner_round.document.url }}" target="_blank">View Uploaded Document</a></div>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="detail-card" style="margin-bottom:20px;">
+            <div class="detail-label">Lift Status</div>
+            <div class="detail-value">This member has not lifted yet.</div>
+        </div>
+        {% endif %}
+
+        <div class="section-title">Round-wise Summary</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Planned Date</th>
+                    <th>Lift Installment</th>
+                    <th>Chit Installment</th>
+                    <th>Payments</th>
+                    <th>Total Paid In Round</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in schedule_rows %}
+                <tr>
+                    <td>{{ row.round_number }}</td>
+                    <td>{{ row.planned_date }}</td>
+                    <td>Rs {{ row.lift_installment }}</td>
+                    <td>Rs {{ row.chit_installment }}</td>
+                    <td>
+                        {% if row.payments %}
+                            {% for payment in row.payments %}
+                            <div class="payment-line">Rs {{ payment.amount_paid }}{% if payment.paid_date %} | {{ payment.paid_date }}{% endif %}</div>
+                            {% endfor %}
+                        {% else %}
+                            <span class="empty">No payment</span>
+                        {% endif %}
+                    </td>
+                    <td class="amount-strong">Rs {{ row.round_total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

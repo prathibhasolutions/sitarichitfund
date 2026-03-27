@@ -1,0 +1,258 @@
+﻿{% load multiply %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ group.name }} - Print</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "Segoe UI", Arial, sans-serif; background: #fff; color: #222; padding: 20px; font-size: 12px; }
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #2a4d7a; padding-bottom: 10px; margin-bottom: 16px; }
+        .page-header h1 { font-size: 1.4em; color: #2a4d7a; }
+        .page-header .meta { font-size: 0.9em; color: #555; margin-top: 4px; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 6px; padding-bottom: 4px; border-bottom: 1px solid #c0cfe0; }
+        .section-title { font-size: 1em; font-weight: 700; color: #2a4d7a; }
+        .styled-table { border-collapse: collapse; width: 100%; font-size: 0.88em; }
+        .styled-table thead tr { background: #2a4d7a; color: #fff; }
+        .styled-table th { padding: 6px 8px; font-weight: 600; text-align: left; white-space: nowrap; background: #2a4d7a; color: #fff; }
+        .styled-table td { padding: 5px 8px; border-bottom: 1px solid #dde3ea; }
+        .styled-table tbody tr:nth-child(even) { background: #f5f7fb; }
+        .styled-table tfoot tr { background: #e8ecf1; font-weight: 700; }
+        .lifted-row { background: #ff0000 !important; color: #fff; }
+        .due-pos { color: #c0392b; font-weight: 700; }
+        .due-neg { color: #27ae60; font-weight: 700; }
+        .tick { color: #27ae60; font-weight: bold; }
+        .cross { color: #e74c3c; font-weight: bold; }
+        .btn-print-all, .btn-section-print {
+            display: inline-block; background: #2a4d7a; color: #fff;
+            padding: 5px 14px; border-radius: 5px; font-weight: 600;
+            font-size: 0.88em; cursor: pointer; border: none; margin: 0 4px 0 0;
+        }
+        .btn-print-all:hover, .btn-section-print:hover { background: #18325a; }
+        .btn-close { background: #888; }
+        .btn-close:hover { background: #555; }
+        @media print {
+            @page { size: A4 landscape; margin: 10mm 12mm; }
+            .no-print { display: none !important; }
+            body { padding: 0; }
+            .section-title { color: #000 !important; }
+            .styled-table thead tr, .styled-table th {
+                background: #444 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .lifted-row {
+                background: #ff0000 !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="no-print" style="margin-bottom:14px;">
+    <button class="btn-print-all" onclick="window.print()">&#128424; Print All / Save as PDF</button>
+    <a href="javascript:window.close();" class="btn-print-all btn-close">&#10005; Close</a>
+</div>
+
+<div class="page-header" id="page-header">
+    <div>
+        <h1>{{ group.name }}</h1>
+        <div class="meta">
+            Period: {{ group.get_frequency_months_display }} &nbsp;|&nbsp;
+            Total Rounds: {{ group.total_rounds }} &nbsp;|&nbsp;
+            Start Date: {{ group.start_date }} &nbsp;|&nbsp;
+            Group Value: &#8377;{{ group.total_members|multiply:group.prize_amount|floatformat:2 }} &nbsp;|&nbsp;
+            Total Due: <span style="color:#c0392b;font-weight:700;">&#8377;{{ schedule_due_total }}</span> &nbsp;|&nbsp;
+            Installment: &#8377;{{ group.installment_amount|floatformat:2 }}
+        </div>
+    </div>
+    <div class="meta" style="text-align:right;">Sitari Chit Fund</div>
+</div>
+
+<!-- MEMBERS SECTION -->
+<div id="sec-members">
+<div class="section-header">
+    <span class="section-title">Members</span>
+    <button class="btn-section-print no-print" onclick="printSection('sec-members')">&#128424; Print Members</button>
+</div>
+<div style="overflow-x:auto;">
+<table class="styled-table">
+    <tbody>
+        <tr>
+            <th>Slot</th>
+            {% for item in members_data %}
+            <td>{{ item.membership.slot_number }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Name</th>
+            {% for item in members_data %}
+            <td{% if item.is_lifted %} class="lifted-row"{% endif %}>
+                {{ item.membership.member.name }}
+                {% if item.is_lifted %}<span style="color:#fff;font-size:0.75em;"> (Lifted)</span>{% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Mobile No.</th>
+            {% for item in members_data %}
+            <td>{{ item.membership.member.phone }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Aadhar No.</th>
+            {% for item in members_data %}
+            <td>{{ item.membership.member.aadhar_number }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Lift Amount</th>
+            {% for item in members_data %}
+            <td{% if item.is_lifted %} class="lifted-row"{% endif %}>
+                {% if item.is_lifted %}&#8377;{{ item.lift_amount }}{% else %}-{% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Total Paid</th>
+            {% for item in members_data %}
+            <td>&#8377;{{ item.total_paid }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th>Due Amount</th>
+            {% for item in members_data %}
+            <td>
+                {% if item.is_lifted %}
+                    <span class="{% if item.due_positive %}due-pos{% else %}due-neg{% endif %}">&#8377;{{ item.due_amount }}</span>
+                {% else %}-{% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+</div>
+</div>
+
+<!-- INSTALLMENT SCHEDULE SECTION -->
+<div id="sec-schedule">
+<div class="section-header">
+    <span class="section-title">Installment Schedule</span>
+    <button class="btn-section-print no-print" onclick="printSection('sec-schedule')">&#128424; Print Schedule</button>
+</div>
+<div style="overflow-x:auto;">
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>SL. No</th>
+            <th>Planned Date</th>
+            <th>Lift Installment</th>
+            <th>Chit Installment</th>
+            {% for m in memberships %}
+            <th>{{ m.member.name }}</th>
+            {% endfor %}
+            <th>Received Amount</th>
+            <th>Due Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in schedule_data %}
+        <tr>
+            <td>{{ item.schedule.round_number }}</td>
+            <td>{{ item.schedule.planned_date }}</td>
+            <td>&#8377;{{ item.schedule.winner_installment_amount }}</td>
+            <td>&#8377;{{ item.schedule.others_installment_amount }}</td>
+            {% for cell in item.member_payments %}
+            <td style="text-align:center;">
+                {% if cell.paid %}
+                    <span class="tick">&#10004;</span>
+                    {% for p in cell.payments %}
+                    <br><span style="font-size:0.8em;color:#555;">&#8377;{{ p.amount }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="cross">&#10008;</span>
+                {% endif %}
+            </td>
+            {% endfor %}
+            <td style="font-weight:600;">&#8377;{{ item.round_total }}</td>
+            <td style="font-weight:600;color:#c0392b;">&#8377;{{ item.due_amount }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2" style="text-align:right;">Total</td>
+            <td style="text-align:center;">&#8377;{{ schedule_winner_total }}</td>
+            <td style="text-align:center;">&#8377;{{ schedule_others_total }}</td>
+            {% for total in member_totals %}
+            <td style="text-align:center;">&#8377;{{ total }}</td>
+            {% endfor %}
+            <td>&#8377;{{ grand_total }}</td>
+            <td style="color:#c0392b;">&#8377;{{ schedule_due_total }}</td>
+        </tr>
+    </tfoot>
+</table>
+</div>
+</div>
+
+<!-- INSTALLMENT DETAILS SECTION -->
+<div id="sec-details">
+<div class="section-header">
+    <span class="section-title">Installment Details</span>
+    <button class="btn-section-print no-print" onclick="printSection('sec-details')">&#128424; Print Details</button>
+</div>
+<div style="overflow-x:auto;">
+<table class="styled-table">
+    <thead>
+        <tr>
+            <th>SL. No</th>
+            <th>Date</th>
+            <th>Lift Member</th>
+            <th>Lift Amount</th>
+            <th>Surety Details</th>
+            <th>Disbursed Date</th>
+            <th>Disbursement Mode</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for round in group.rounds.all %}
+        <tr>
+            <td>{{ round.round_number }}</td>
+            <td>{{ round.round_date }}</td>
+            <td>{% if round.winner %}{{ round.winner.member.name }}{% else %}-{% endif %}</td>
+            <td>{% if round.lift_amount %}&#8377;{{ round.lift_amount|floatformat:2 }}{% else %}-{% endif %}</td>
+            <td>{{ round.surety_details|default:"-" }}</td>
+            <td>{{ round.disbursed_date|default:"-" }}</td>
+            <td>{{ round.disbursement_mode|default:"-" }}</td>
+            <td>{{ round.remarks|default:"-" }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+
+<script>
+function printSection(sectionId) {
+    var header = document.getElementById('page-header').outerHTML;
+    var section = document.getElementById(sectionId).outerHTML;
+    var styles = document.querySelector('style').outerHTML;
+    var win = window.open('', '_blank', 'width=1200,height=700');
+    win.document.write(
+        '<!DOCTYPE html><html><head><meta charset="UTF-8">' + styles + '</head>' +
+        '<body style="padding:20px">' + header + section + '</body></html>'
+    );
+    win.document.close();
+    win.focus();
+    win.print();
+    setTimeout(function(){ win.close(); }, 1500);
+}
+window.onload = function() { window.print(); };
+</script>
+</body>
+</html>

@@ -1,0 +1,724 @@
+{% load multiply %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sitari Chit Fund</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ─── Sidebar ─── */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #1a2e4a 0%, #2a4d7a 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+        .sidebar-header {
+            padding: 28px 24px 18px;
+            font-size: 1.25em;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+        }
+        .sidebar-label {
+            padding: 18px 24px 8px;
+            font-size: 0.72em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.45);
+        }
+        .sidebar-action {
+            padding: 18px 24px 0;
+        }
+        .sidebar-action a {
+            display: block;
+            text-align: center;
+            background: #5b9aff;
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+        .sidebar-action a:hover {
+            background: #3f7fe0;
+        }
+        .group-list {
+            list-style: none;
+            flex: 1;
+        }
+        .group-list li a {
+            display: block;
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            padding: 13px 24px;
+            border-left: 4px solid transparent;
+            transition: all 0.15s;
+            font-size: 0.95em;
+        }
+        .group-list li a:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+        .group-list li a.active {
+            background: rgba(255,255,255,0.12);
+            border-left-color: #5b9aff;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* ─── Main ─── */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            padding: 36px 44px;
+            min-height: 100vh;
+        }
+        .main h1 {
+            color: #1a2e4a;
+            font-size: 1.5em;
+            margin-bottom: 6px;
+        }
+        .meta-cards {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0 28px;
+            flex-wrap: wrap;
+        }
+        .meta-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 14px 22px;
+            min-width: 150px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            border-left: 4px solid #2a4d7a;
+        }
+        .meta-card .label {
+            font-size: 0.72em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .meta-card .value {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2a4d7a;
+            margin-top: 2px;
+        }
+
+        /* ─── Sections ─── */
+        .section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 22px 26px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .section h2 {
+            font-size: 1.05em;
+            color: #2a4d7a;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8ecf1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn-section-print {
+            background: #2a4d7a;
+            color: #fff;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 5px;
+            font-size: 0.78em;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .btn-section-print:hover { background: #18325a; }
+
+        /* ─── Members ─── */
+        .member-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .member-chip {
+            background: #e3eafc;
+            color: #1a2e4a;
+            padding: 6px 16px;
+            border-radius: 18px;
+            font-weight: 500;
+            font-size: 0.92em;
+        }
+        .member-chip.lifted {
+            background: #ff0000;
+            color: #fff;
+            border: 1px solid #cc0000;
+        }
+
+        /* ─── Tables ─── */
+        .styled-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.9em;
+        }
+        .styled-table thead tr {
+            background: #2a4d7a;
+            color: #fff;
+            text-align: left;
+        }
+        .styled-table th {
+            padding: 10px 14px;
+            font-weight: 600;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .styled-table td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+        .styled-table tbody tr:nth-child(even) {
+            background: #f7f9fc;
+        }
+        .styled-table tbody tr:hover {
+            background: #eef2f9;
+        }
+
+        /* ─── Buttons ─── */
+        .btn-print {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 24px;
+        }
+        .btn-print:hover { background: #18325a; color: #fff; }
+        .btn-edit {
+            display: inline-block;
+            background: #16a34a;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-left: 8px;
+            margin-bottom: 24px;
+        }
+        .btn-edit:hover { background: #15803d; color: #fff; }
+        .btn-edit-members {
+            display: inline-block;
+            background: #7c3aed;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.75em;
+            margin-left: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+        .btn-edit-members:hover { background: #6d28d9; }
+        .btn-book {
+            display: inline-block;
+            background: #0f766e;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.76em;
+            white-space: nowrap;
+        }
+        .btn-book:hover { background: #115e59; }
+
+        /* ─── Add Row ─── */
+        .add-row td {
+            background: #f0f4fa !important;
+        }
+        .add-row input, .add-row select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #bfc9d1;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: inherit;
+            background: #fff;
+        }
+        .add-row input:focus, .add-row select:focus {
+            outline: none;
+            border-color: #5b9aff;
+            box-shadow: 0 0 0 2px rgba(91,154,255,0.15);
+        }
+        .btn-add {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 8px 22px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-add:hover { background: #1e7e34; }
+
+        /* ─── Empty ─── */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #aaa;
+            font-size: 1.1em;
+        }
+
+        /* ─── Payment Cell ─── */
+        .pay-cell { text-align: center; min-width: 150px; vertical-align: top; }
+        .pay-cell.paid { background: #eafaf1 !important; }
+        .pay-entries { margin-bottom: 6px; }
+        .pay-entry {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.78em;
+            padding: 1px 0;
+        }
+        .pay-entry .tick { color: #27ae60; font-weight: bold; }
+        .pay-entry .pay-info { color: #555; }
+        .pay-total {
+            font-size: 0.78em;
+            font-weight: 700;
+            color: #2a4d7a;
+            border-top: 1px solid #ccc;
+            margin-top: 2px;
+            padding-top: 2px;
+        }
+        .pay-form {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            align-items: center;
+            margin-top: 4px;
+            border-top: 1px dashed #d0d0d0;
+            padding-top: 4px;
+        }
+        .pay-form input {
+            width: 110px;
+            padding: 3px 6px;
+            border: 1px solid #bfc9d1;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-family: inherit;
+        }
+        .pay-form input:focus {
+            outline: none;
+            border-color: #5b9aff;
+        }
+        .pay-form .btn-save {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .pay-form .btn-save:hover { background: #1e8449; }
+        .due-positive { font-weight: 700; color: #c0392b; }
+        .due-negative { font-weight: 700; color: #27ae60; }
+        .pay-cross { color: #e74c3c; font-size: 1.2em; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <nav class="sidebar">
+        <div class="sidebar-header">Sitari Chit Fund</div>
+        <div class="sidebar-action">
+            <a href="{% url 'create_group' %}">+ New Chit Group</a>
+        </div>
+        <div class="sidebar-label">Chit Groups</div>
+        <ul class="group-list">
+            {% for group in groups %}
+            <li>
+                <a href="{% url 'dashboard_group' group.id %}"
+                   class="{% if selected_group and group.id == selected_group.id %}active{% endif %}">
+                    {{ group.name }}
+                </a>
+            </li>
+            {% empty %}
+            <li style="padding: 14px 24px; color: rgba(255,255,255,0.45);">No groups yet</li>
+            {% endfor %}
+        </ul>
+    </nav>
+
+    <main class="main">
+        {% if selected_group %}
+        <h1>{{ selected_group.name }}</h1>
+
+        <div class="meta-cards">
+            <div class="meta-card">
+                <div class="label">Period</div>
+                <div class="value">{{ selected_group.get_frequency_months_display }}</div>
+            </div>
+            <div class="meta-card">
+                <div class="label">Total Rounds</div>
+                <div class="value">{{ selected_group.total_rounds }}</div>
+            </div>
+            <div class="meta-card">
+                <div class="label">Group Value</div>
+                <div class="value">₹{{ selected_group.total_members|multiply:selected_group.prize_amount|floatformat:2 }}</div>
+            </div>
+            <div class="meta-card">
+                <div class="label">Total Due</div>
+                <div class="value" style="color:#c0392b;">₹{{ schedule_due_total }}</div>
+            </div>
+            <div class="meta-card">
+                <div class="label">Members</div>
+                <div class="value">{{ selected_group.total_members }}</div>
+            </div>
+            <div class="meta-card">
+                <div class="label">Installment</div>
+                <div class="value">₹{{ selected_group.installment_amount|floatformat:2 }}</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <a href="{% url 'group_print' selected_group.id %}" target="_blank" class="btn-print">🖨️ Print / Download</a>
+            <a href="{% url 'edit_group' selected_group.id %}" class="btn-edit">✏️ Edit Details</a>
+        </div>
+
+        <div class="section" id="sec-members">
+            <h2>Members <button class="btn-section-print" onclick="printSection('sec-members', 'Members')">&#128424; Print</button> <a href="{% url 'edit_members' selected_group.id %}" class="btn-edit-members">✏️ Edit Members</a></h2>
+            <div style="overflow-x:auto;">
+            <table class="styled-table">
+                <tbody>
+                    <tr>
+                        <th>Slot</th>
+                        {% for item in members_data %}
+                        <td>{{ item.membership.slot_number }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Name</th>
+                        {% for item in members_data %}
+                        <td{% if item.is_lifted %} style="background:#ff0000;color:#fff;"{% endif %}>
+                            {{ item.membership.member.name }}{% if item.is_lifted %} <span style="color:#fff;font-size:0.8em;font-weight:600;">(Lifted)</span>{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Mobile No.</th>
+                        {% for item in members_data %}
+                        <td>{{ item.membership.member.phone|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Aadhar No.</th>
+                        {% for item in members_data %}
+                        <td>{{ item.membership.member.aadhar_number|default:"-" }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Lift Amount</th>
+                        {% for item in members_data %}
+                        <td{% if item.is_lifted %} style="background:#ff0000;color:#fff;"{% endif %}>{% if item.is_lifted %}₹{{ item.lift_amount }}{% else %}-{% endif %}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Total Paid</th>
+                        {% for item in members_data %}
+                        <td{% if item.is_lifted %} style="background:#ff0000;color:#fff;"{% endif %}>₹{{ item.total_paid }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Due Amount</th>
+                        {% for item in members_data %}
+                        <td{% if item.is_lifted %} class="{% if item.due_positive %}due-positive{% else %}due-negative{% endif %}"{% else %}{% endif %}>{% if item.is_lifted %}₹{{ item.due_amount }}{% else %}-{% endif %}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Book</th>
+                        {% for item in members_data %}
+                        <td><a href="{% url 'member_book' selected_group.id item.membership.id %}" target="_blank" class="btn-book">Open Book</a></td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+
+        <div class="section" id="sec-schedule">
+            <h2>Installment Schedule <button class="btn-section-print" onclick="printSection('sec-schedule', 'Installment Schedule')">&#128424; Print</button> <a href="{% url 'edit_schedules' selected_group.id %}" class="btn-edit-members">✏️ Edit Details</a></h2>
+            <div style="overflow-x:auto;">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>SL. No</th>
+                        <th>Planned Date</th>
+                        <th>Lift Member Installment</th>
+                        <th>Chit Installment</th>
+                        {% for m in memberships %}
+                        <th>{{ m.member.name }}</th>
+                        {% endfor %}
+                        <th>Received Amount</th>
+                        <th>Due Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in schedule_data %}
+                    <tr>
+                        <td>{{ item.schedule.round_number }}</td>
+                        <td>{{ item.schedule.planned_date }}</td>
+                        <td>₹{{ item.schedule.winner_installment_amount }}</td>
+                        <td>₹{{ item.schedule.others_installment_amount }}</td>
+                        {% for cell in item.member_payments %}
+                        <td class="pay-cell{% if cell.paid %} paid{% endif %}" id="cell-{{ cell.round_number }}-{{ cell.membership_id }}">
+                            <div class="pay-entries" id="entries-{{ cell.round_number }}-{{ cell.membership_id }}">
+                            {% if cell.paid %}
+                                {% for p in cell.payments %}
+                                <div class="pay-entry">
+                                    <span class="tick">✔</span>
+                                    <span class="pay-info">₹{{ p.amount }} | {{ p.date }}</span>
+                                </div>
+                                {% endfor %}
+                                <div class="pay-total">Total: ₹{{ cell.cell_total }}</div>
+                            {% else %}
+                                <div class="pay-cross">✘</div>
+                            {% endif %}
+                            </div>
+                            <div class="pay-form">
+                                <input type="number" step="0.01" placeholder="Amount" id="amt-{{ cell.round_number }}-{{ cell.membership_id }}">
+                                <input type="date" id="dt-{{ cell.round_number }}-{{ cell.membership_id }}">
+                                <button type="button" class="btn-save" data-round="{{ cell.round_number }}" data-member="{{ cell.membership_id }}" onclick="savePayment(this.dataset.round, this.dataset.member)">Save</button>
+                            </div>
+                        </td>
+                        {% endfor %}
+                        <td style="font-weight:600;">₹{{ item.round_total }}</td>
+                        <td style="font-weight:600; color:#c0392b;">₹{{ item.due_amount }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="background:#e8ecf1;font-weight:700;">
+                        <td colspan="2" style="text-align:right;">Total</td>
+                        <td style="text-align:center;">₹{{ schedule_winner_total }}</td>
+                        <td style="text-align:center;">₹{{ schedule_others_total }}</td>
+                        {% for total in member_totals %}
+                        <td style="text-align:center;">₹{{ total }}</td>
+                        {% endfor %}
+                        <td style="font-weight:700;">₹{{ grand_total }}</td>
+                        <td style="font-weight:700; color:#c0392b;">₹{{ schedule_due_total }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+            </div>
+        </div>
+
+        <div class="section" id="sec-details">
+            <h2>Installment Details <button class="btn-section-print" onclick="printSection('sec-details', 'Installment Details')">&#128424; Print</button> <a href="{% url 'edit_rounds' selected_group.id %}" class="btn-edit-members">✏️ Edit Details</a></h2>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>SL. No</th>
+                        <th>Date</th>
+                        <th>Lift Member</th>
+                        <th>Lift Amount</th>
+                        <th>Surety Details</th>
+                        <th>Disbursed Date</th>
+                        <th>Disbursement Mode</th>
+                        <th>Document</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for round in selected_group.rounds.all %}
+                    <tr>
+                        <td>{{ round.round_number }}</td>
+                        <td>{{ round.round_date }}</td>
+                        <td>{% if round.winner %}{{ round.winner.member.name }}{% else %}-{% endif %}</td>
+                        <td>{% if round.lift_amount %}₹{{ round.lift_amount|floatformat:2 }}{% else %}-{% endif %}</td>
+                        <td>{{ round.surety_details|default:"-" }}</td>
+                        <td>{{ round.disbursed_date|default:"-" }}</td>
+                        <td>{{ round.disbursement_mode|default:"-" }}</td>
+                        <td>{% if round.document %}<a href="{{ round.document.url }}" target="_blank">📄 View</a>{% else %}-{% endif %}</td>
+                        <td>{{ round.remarks|default:"-" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <tfoot>
+                <form method="post" action="{% url 'add_round' selected_group.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <tr class="add-row">
+                        <td>{{ selected_group.rounds.count|add:1 }}</td>
+                        <td><input type="date" name="round_date" required></td>
+                        <td>
+                            <select name="winner">
+                                <option value="">-- Select --</option>
+                                {% for m in selected_group.memberships.all %}
+                                <option value="{{ m.id }}">{{ m.member.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="number" step="0.01" name="lift_amount" placeholder="Lift amount"></td>
+                        <td><input type="text" name="surety_details" placeholder="Surety details"></td>
+                        <td><input type="date" name="disbursed_date"></td>
+                        <td>
+                            <select name="disbursement_mode">
+                                <option value="">--</option>
+                                <option value="cash">Cash</option>
+                                <option value="bank">Bank Transfer</option>
+                                <option value="upi">UPI</option>
+                            </select>
+                        </td>
+                        <td><input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png"></td>
+                        <td>
+                            <input type="text" name="remarks" placeholder="Remarks">
+                        </td>
+                    </tr>
+                    <tr class="add-row">
+                        <td colspan="9" style="text-align: right; border: none; padding-top: 8px;">
+                            <button type="submit" class="btn-add">+ Add Round</button>
+                        </td>
+                    </tr>
+                </form>
+                </tfoot>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="empty-state">Select a chit group from the sidebar to view its details.</div>
+        {% endif %}
+    </main>
+</div>
+{% if selected_group %}
+<script>
+function printSection(sectionId, title) {
+    var groupName = document.querySelector('.main h1') ? document.querySelector('.main h1').textContent : '';
+    var section = document.getElementById(sectionId).cloneNode(true);
+    // Remove the print button and payment forms from the cloned section
+    var btn = section.querySelector('.btn-section-print');
+    if (btn) btn.remove();
+    section.querySelectorAll('.pay-form').forEach(function(el){ el.remove(); });
+    var styles = document.querySelector('style').outerHTML;
+    var printStyles = '<style>' +
+        '@page { size: A4 landscape; margin: 8mm 10mm; }' +
+        '* { box-sizing: border-box; }' +
+        'body { margin: 0; padding: 8px 12px; font-size: 9.5px; font-family: "Segoe UI", Arial, sans-serif; }' +
+        '.section { box-shadow: none !important; padding: 0; margin: 0; }' +
+        'h1 { font-size: 1.1em; color: #2a4d7a; border-bottom: 2px solid #2a4d7a; padding-bottom: 6px; margin-bottom: 10px; }' +
+        'h2 { font-size: 0.95em !important; margin-bottom: 8px !important; border-bottom: 1px solid #ccc !important; }' +
+        'h2 button { display: none !important; }' +
+        '.styled-table { width: 100%; table-layout: auto; border-collapse: collapse; font-size: 1em; }' +
+        '.styled-table th { padding: 4px 5px !important; font-size: 0.85em; white-space: nowrap; background: #2a4d7a !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+        '.styled-table td { padding: 3px 5px !important; border-bottom: 1px solid #dde3ea; word-break: break-word; max-width: 120px; }' +
+        '.styled-table tbody tr:nth-child(even) { background: #f5f7fb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+        '.styled-table tfoot tr { background: #e8ecf1 !important; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+        '[style*="background:#ff0000"] { background: #ff0000 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+        '.pay-form { display: none !important; }' +
+        '.pay-cross { display: none; }' +
+        '.pay-info, .pay-total { font-size: 0.85em; }' +
+        'div[style*="overflow-x"] { overflow: visible !important; }' +
+        '</style>';
+    var win = window.open('', '_blank', 'width=1200,height=750');
+    win.document.write(
+        '<!DOCTYPE html><html><head><meta charset="UTF-8">' + styles + printStyles +
+        '</head><body>' +
+        '<h1>' + groupName + ' &mdash; ' + title + '</h1>' +
+        section.outerHTML + '</body></html>'
+    );
+    win.document.close();
+    win.focus();
+    win.print();
+    setTimeout(function(){ win.close(); }, 1500);
+}
+
+function getCookie(name) {
+    let v = null;
+    document.cookie.split(';').forEach(c => {
+        c = c.trim();
+        if (c.startsWith(name + '=')) v = decodeURIComponent(c.substring(name.length + 1));
+    });
+    return v;
+}
+
+function savePayment(roundNumber, membershipId) {
+    const amt = document.getElementById('amt-' + roundNumber + '-' + membershipId);
+    const dt = document.getElementById('dt-' + roundNumber + '-' + membershipId);
+    if (!amt.value || !dt.value) {
+        alert('Please enter both amount and date.');
+        return;
+    }
+    const form = new FormData();
+    form.append('round_number', roundNumber);
+    form.append('membership_id', membershipId);
+    form.append('amount', amt.value);
+    form.append('paid_date', dt.value);
+
+    fetch('{% url "save_payment" selected_group.id %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCookie('csrftoken') },
+        body: form,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const cell = document.getElementById('cell-' + roundNumber + '-' + membershipId);
+            const entries = document.getElementById('entries-' + roundNumber + '-' + membershipId);
+            cell.classList.add('paid');
+            // Remove the cross mark if present
+            const cross = entries.querySelector('.pay-cross');
+            if (cross) cross.remove();
+            // Remove existing total line
+            const oldTotal = entries.querySelector('.pay-total');
+            if (oldTotal) oldTotal.remove();
+            // Add new payment entry
+            const entry = document.createElement('div');
+            entry.className = 'pay-entry';
+            entry.innerHTML = '<span class="tick">✔</span><span class="pay-info">₹' + data.amount + ' | ' + data.date + '</span>';
+            entries.appendChild(entry);
+            // Add updated total
+            const totalDiv = document.createElement('div');
+            totalDiv.className = 'pay-total';
+            totalDiv.textContent = 'Total: ₹' + data.cell_total;
+            entries.appendChild(totalDiv);
+            // Clear inputs
+            amt.value = '';
+            dt.value = '';
+        } else {
+            alert(data.error || 'Failed to save.');
+        }
+    })
+    .catch(() => alert('Network error. Please try again.'));
+}
+</script>
+{% endif %}
+</body>
+</html>

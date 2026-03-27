@@ -1,0 +1,267 @@
+{% load multiply %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit {{ group.name }} - Sitari Chit Fund</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 16px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.6em;
+        }
+        .header a {
+            color: #2a4d7a;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        .header a:hover {
+            color: #18325a;
+        }
+
+        .form-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .form-section {
+            margin-bottom: 28px;
+        }
+        .form-section h3 {
+            color: #2a4d7a;
+            font-size: 1em;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1px solid #bfc9d1;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+            background: #fff;
+            color: #222;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2a4d7a;
+            box-shadow: 0 0 0 3px rgba(42, 77, 122, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e8ecf1;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .btn-save {
+            background: #2a4d7a;
+            color: #fff;
+        }
+        .btn-save:hover {
+            background: #18325a;
+        }
+        .btn-cancel {
+            background: #e8ecf1;
+            color: #555;
+        }
+        .btn-cancel:hover {
+            background: #d8dde5;
+        }
+
+        .help-text {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px 12px;
+            }
+            .form-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edit {{ group.name }}</h1>
+            <a href="{% url 'dashboard_group' group.id %}">← Back</a>
+        </div>
+
+        <div class="form-card">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Basic Details -->
+                <div class="form-section">
+                    <h3>Basic Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Group Name</label>
+                            <input type="text" id="name" name="name" value="{{ group.name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="upcoming" {% if group.status == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                                <option value="active" {% if group.status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="closed" {% if group.status == 'closed' %}selected{% endif %}>Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Details -->
+                <div class="form-section">
+                    <h3>Financial Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prize_amount">Prize Amount (₹)</label>
+                            <input type="number" id="prize_amount" name="prize_amount" step="0.01" value="{{ group.prize_amount }}" required>
+                            <span class="help-text">Total prize amount winner receives</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="installment_amount">Installment Amount (₹)</label>
+                            <input type="number" id="installment_amount" name="installment_amount" step="0.01" value="{{ group.installment_amount }}" required>
+                            <span class="help-text">Amount each non-winner pays per round</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="penalty_amount">Penalty Amount (₹)</label>
+                            <input type="number" id="penalty_amount" name="penalty_amount" step="0.01" value="{{ group.penalty_amount }}">
+                            <span class="help-text">Penalty for late payment</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="due_day">Due Day</label>
+                            <input type="number" id="due_day" name="due_day" min="1" max="31" value="{{ group.due_day }}">
+                            <span class="help-text">Day of month by which payment is due</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group Structure -->
+                <div class="form-section">
+                    <h3>Group Structure</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="total_members">Total Members</label>
+                            <input type="number" id="total_members" name="total_members" min="1" value="{{ group.total_members }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="total_rounds">Total Rounds</label>
+                            <input type="number" id="total_rounds" name="total_rounds" min="1" value="{{ group.total_rounds }}" required>
+                            <span class="help-text">Usually equal to total members</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="frequency_months">Frequency</label>
+                            <select id="frequency_months" name="frequency_months">
+                                <option value="1" {% if group.frequency_months == 1 %}selected{% endif %}>Monthly</option>
+                                <option value="2" {% if group.frequency_months == 2 %}selected{% endif %}>Every 2 Months</option>
+                                <option value="3" {% if group.frequency_months == 3 %}selected{% endif %}>Every 3 Months</option>
+                                <option value="6" {% if group.frequency_months == 6 %}selected{% endif %}>Every 6 Months</option>
+                            </select>
+                            <span class="help-text">How often the chit auction happens</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="start_date">Start Date</label>
+                            <input type="date" id="start_date" name="start_date" value="{{ group.start_date }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="form-section">
+                    <h3>Additional Information</h3>
+                    <div class="form-row full">
+                        <div class="form-group">
+                            <label for="notes">Notes</label>
+                            <textarea id="notes" name="notes">{{ group.notes|default:"" }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-save">💾 Save Changes</button>
+                    <a href="{% url 'dashboard_group' group.id %}" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

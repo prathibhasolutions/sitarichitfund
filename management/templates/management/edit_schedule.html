@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Schedule Round {{ schedule.round_number }} - {{ group.name }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 16px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.4em;
+        }
+        .header a {
+            color: #2a4d7a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .header a:hover {
+            color: #18325a;
+        }
+        .form-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .schedule-badge {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+        }
+        .form-section {
+            margin-bottom: 24px;
+        }
+        .form-section h3 {
+            color: #2a4d7a;
+            font-size: 0.95em;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8ecf1;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85em;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .form-group input {
+            padding: 10px 12px;
+            border: 1px solid #bfc9d1;
+            border-radius: 5px;
+            font-size: 0.95em;
+            font-family: inherit;
+            background: #fff;
+            color: #222;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #2a4d7a;
+            box-shadow: 0 0 0 3px rgba(42, 77, 122, 0.1);
+        }
+        .help-text {
+            font-size: 0.75em;
+            color: #888;
+            margin-top: 4px;
+            font-style: italic;
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e8ecf1;
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
+        }
+        .btn-save {
+            background: #2a4d7a;
+            color: #fff;
+        }
+        .btn-save:hover {
+            background: #18325a;
+        }
+        .btn-cancel {
+            background: #e8ecf1;
+            color: #555;
+        }
+        .btn-cancel:hover {
+            background: #d8dde5;
+        }
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 20px 12px;
+            }
+            .form-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Edit Installment Schedule</h1>
+                <a href="{% url 'edit_schedules' group.id %}">← Back to Schedule List</a>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="schedule-badge">Round {{ schedule.round_number }} | {{ group.name }}</div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-section">
+                    <h3>Schedule Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="planned_date">Planned Date</label>
+                            <input type="date" id="planned_date" name="planned_date" value="{{ schedule.planned_date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="winner_installment_amount">Lift Installment</label>
+                            <input type="number" id="winner_installment_amount" name="winner_installment_amount" step="0.01" value="{{ schedule.winner_installment_amount }}" required>
+                            <div class="help-text">Amount a lifted member pays in this round.</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="others_installment_amount">Chit Installment</label>
+                            <input type="number" id="others_installment_amount" name="others_installment_amount" step="0.01" value="{{ schedule.others_installment_amount }}" required>
+                            <div class="help-text">Amount not-yet-lifted members pay in this round.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-save">💾 Save Changes</button>
+                    <a href="{% url 'edit_schedules' group.id %}" class="btn btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

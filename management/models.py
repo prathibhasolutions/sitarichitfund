@@ -103,12 +103,12 @@ class ChitRound(models.Model):
     round_number = models.PositiveIntegerField()
     round_date = models.DateField()
     winner = models.ForeignKey(ChitMembership, on_delete=models.PROTECT, related_name='won_rounds', blank=True, null=True)
-    winner_installment_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Reduced amount winner pays this round')
-    others_installment_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Amount all other members pay')
-    prize_amount = models.DecimalField(max_digits=12, decimal_places=2, help_text='Prize disbursed to winner')
+    lift_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text='Amount given to the lift member this round')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     disbursed_date = models.DateField(blank=True, null=True)
     disbursement_mode = models.CharField(max_length=50, choices=[('cash', 'Cash'), ('bank', 'Bank Transfer'), ('upi', 'UPI')], blank=True, null=True)
+    document = models.FileField(upload_to='round_documents/', blank=True, null=True, help_text='Upload PDF or image')
+    surety_details = models.TextField(blank=True, null=True, help_text='Surety/guarantor details for this round')
     remarks = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -144,6 +144,5 @@ class Payment(models.Model):
     class Meta:
         verbose_name = 'Payment'
         verbose_name_plural = 'Payments'
-        unique_together = [['membership', 'chit_round']]
         ordering = ['-chit_round__round_date']
 

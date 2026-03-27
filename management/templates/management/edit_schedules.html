@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Installment Schedule - {{ group.name }}</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e8ecf1;
+            padding-bottom: 16px;
+        }
+        .header h1 {
+            color: #1a2e4a;
+            font-size: 1.6em;
+        }
+        .header a {
+            color: #2a4d7a;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        .header a:hover {
+            color: #18325a;
+        }
+        .schedule-list {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .schedule-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: start;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e8ecf1;
+            transition: background-color 0.15s;
+        }
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+        .schedule-item:hover {
+            background-color: #f7f9fc;
+        }
+        .schedule-number {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 1.1em;
+            min-width: 50px;
+            text-align: center;
+        }
+        .schedule-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+        .info-item {
+            font-size: 0.85em;
+        }
+        .info-label {
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        .info-value {
+            color: #1a2e4a;
+            font-weight: 500;
+        }
+        .schedule-action {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-edit {
+            display: inline-block;
+            background: #2a4d7a;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85em;
+            transition: background-color 0.15s;
+        }
+        .btn-edit:hover {
+            background: #18325a;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        @media (max-width: 700px) {
+            .schedule-item {
+                grid-template-columns: 1fr;
+            }
+            .schedule-info {
+                grid-template-columns: 1fr;
+            }
+            .schedule-action {
+                width: 100%;
+            }
+            .btn-edit {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edit Installment Schedule - {{ group.name }}</h1>
+            <a href="{% url 'dashboard_group' group.id %}">← Back to Dashboard</a>
+        </div>
+
+        {% if schedules %}
+        <div class="schedule-list">
+            {% for schedule in schedules %}
+            <div class="schedule-item">
+                <div class="schedule-number">{{ schedule.round_number }}</div>
+                <div class="schedule-info">
+                    <div class="info-item">
+                        <div class="info-label">Planned Date</div>
+                        <div class="info-value">{{ schedule.planned_date }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Lift Installment</div>
+                        <div class="info-value">₹{{ schedule.winner_installment_amount|floatformat:2 }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Chit Installment</div>
+                        <div class="info-value">₹{{ schedule.others_installment_amount|floatformat:2 }}</div>
+                    </div>
+                </div>
+                <div class="schedule-action">
+                    <a href="{% url 'edit_schedule' group.id schedule.id %}" class="btn-edit">✏️ Edit</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>No installment schedule entries created yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
