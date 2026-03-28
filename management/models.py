@@ -82,6 +82,8 @@ class ChitMembership(models.Model):
     slot_number = models.PositiveIntegerField(help_text='Member slot number in this group')
     has_won = models.BooleanField(default=False)
     date_enrolled = models.DateField(auto_now_add=True)
+    committed_round_number = models.PositiveIntegerField(blank=True, null=True, help_text='Round number in which this member is committed to receive the lift amount')
+    committed_lift_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, help_text='Committed lift amount for this member')
 
     def __str__(self):
         return f"{self.member.name} - {self.chit_group.name} (Slot {self.slot_number})"

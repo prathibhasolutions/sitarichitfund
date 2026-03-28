@@ -5,6 +5,9 @@ from . import views
 urlpatterns = [
     path('group/create/', views.create_group, name='create_group'),
     path('member/create/', views.create_member, name='create_member'),
+    path('members/', views.all_members, name='all_members'),
+    path('member/<int:member_id>/edit-details/', views.edit_member_details, name='edit_member_details'),
+    path('member/<int:member_id>/delete/', views.delete_member, name='delete_member'),
     path('group/<int:group_id>/print/', views.group_print, name='group_print'),
     path('group/<int:group_id>/edit/', views.edit_group, name='edit_group'),
     path('group/<int:group_id>/members/', views.edit_members, name='edit_members'),

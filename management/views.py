@@ -8,6 +8,56 @@ from django.http import JsonResponse
 from django.db import models as db_models
 from .models import ChitGroup, ChitRound, ChitMembership, Payment, Member, RoundSchedule
 
+# List all members with details and delete option
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+
+def all_members(request):
+    members = Member.objects.all().order_by('-date_joined')
+    return render(request, 'management/all_members.html', {'members': members})
+
+
+def edit_member_details(request, member_id):
+    member = get_object_or_404(Member, pk=member_id)
+    error_message = None
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        alternate_phone = request.POST.get('alternate_phone', '').strip()
+        aadhar_number = request.POST.get('aadhar_number', '').strip()
+        if not name or not phone or not aadhar_number:
+            error_message = 'Name, phone and Aadhar number are required.'
+        elif len(phone) != 10 or not phone.isdigit():
+            error_message = 'Enter a valid 10-digit phone number.'
+        elif alternate_phone and (len(alternate_phone) != 10 or not alternate_phone.isdigit()):
+            error_message = 'Enter a valid 10-digit alternate phone number.'
+        elif len(aadhar_number) != 12 or not aadhar_number.isdigit():
+            error_message = 'Enter a valid 12-digit Aadhar number.'
+        else:
+            member.name = name
+            member.phone = phone
+            member.alternate_phone = alternate_phone or None
+            member.email = request.POST.get('email') or None
+            member.address = request.POST.get('address', member.address)
+            member.aadhar_number = aadhar_number
+            member.is_active = request.POST.get('is_active') == 'on'
+            member.save()
+            return redirect('all_members')
+    return render(request, 'management/edit_member_details.html', {
+        'member': member,
+        'error_message': error_message,
+    })
+
+# Delete member with confirmation
+@csrf_exempt
+def delete_member(request, member_id):
+    member = get_object_or_404(Member, pk=member_id)
+    if request.method == 'POST':
+        member.delete()
+        messages.success(request, f"Member '{member.name}' deleted successfully.")
+        return redirect('all_members')
+    return render(request, 'management/delete_member_confirm.html', {'member': member})
+
 
 def create_member(request):
     error_message = None
@@ -468,6 +518,11 @@ def edit_member(request, group_id, member_id):
         member.address = request.POST.get('address', member.address)
         member.aadhar_number = request.POST.get('aadhar_number', member.aadhar_number)
         member.save()
+        committed_round = request.POST.get('committed_round_number') or None
+        committed_lift = request.POST.get('committed_lift_amount') or None
+        membership.committed_round_number = int(committed_round) if committed_round else None
+        membership.committed_lift_amount = committed_lift if committed_lift else None
+        membership.save()
         return redirect('edit_members', group_id=group.id)
     
     return render(request, 'management/edit_member.html', {

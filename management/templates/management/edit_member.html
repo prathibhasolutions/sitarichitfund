@@ -239,6 +239,24 @@
                     </div>
                 </div>
 
+                <!-- Lift Commitment -->
+                <div class="form-section">
+                    <h3>Lift Commitment</h3>
+                    <p style="font-size:0.85em; color:#888; margin-bottom:14px;">Set a committed round and amount if this member is promised a lift in a specific round. Leave blank if not applicable.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="committed_round_number">Committed Round No.</label>
+                            <input type="number" id="committed_round_number" name="committed_round_number" value="{{ membership.committed_round_number|default:'' }}" min="1" max="{{ group.total_rounds }}" placeholder="e.g. 3">
+                            <span class="help-text">Round number in which this member will receive the lift</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="committed_lift_amount">Committed Lift Amount (₹)</label>
+                            <input type="number" step="0.01" id="committed_lift_amount" name="committed_lift_amount" value="{{ membership.committed_lift_amount|default:'' }}" placeholder="e.g. 90000">
+                            <span class="help-text">Agreed lift amount for this member</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="button-group">
                     <button type="submit" class="btn btn-save">💾 Save Changes</button>

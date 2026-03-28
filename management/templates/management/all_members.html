@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>All Members</h1>
+<div style="margin-bottom: 18px;">
+    <a href="{% url 'create_member' %}" style="background: #1976d2; color: #fff; padding: 9px 18px; border-radius: 6px; text-decoration: none; font-weight: 600;">+ Add Member</a>
+</div>
+<table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Alternate Phone</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Aadhar Number</th>
+            <th>Date Joined</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for member in members %}
+        <tr>
+            <td>{{ member.name }}</td>
+            <td>{{ member.phone }}</td>
+            <td>{{ member.alternate_phone|default:'-' }}</td>
+            <td>{{ member.email|default:'-' }}</td>
+            <td>{{ member.address }}</td>
+            <td>{{ member.aadhar_number }}</td>
+            <td>{{ member.date_joined }}</td>
+            <td>{{ member.is_active|yesno:'Yes,No' }}</td>
+            <td style="white-space:nowrap;">
+                <a href="{% url 'edit_member_details' member.id %}" style="background:#1976d2;color:#fff;padding:5px 12px;border-radius:4px;text-decoration:none;font-weight:600;font-size:0.85em;margin-right:6px;">✏️ Edit</a>
+                <form action="{% url 'delete_member' member.id %}" method="get" style="display:inline;">
+                    <button type="submit" onclick="return confirm('Are you sure you want to delete {{ member.name }}?');" style="background:#e53935;color:#fff;border:none;padding:5px 12px;border-radius:4px;font-weight:600;font-size:0.85em;cursor:pointer;">🗑 Delete</button>
+                </form>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="9">No members found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -363,7 +363,7 @@
         <div class="sidebar-header">Sitari Chit Fund</div>
         <div class="sidebar-action">
             <a href="{% url 'create_group' %}">+ New Chit Group</a>
-            <a href="{% url 'create_member' %}" style="margin-top: 10px; display: block;">+ New Member</a>
+            <a href="{% url 'all_members' %}" style="margin-top: 10px; display: block; background: #ff9800;">👥 All Members</a>
         </div>
         <div class="sidebar-label">Chit Groups</div>
         <ul class="group-list">
@@ -469,6 +469,26 @@
                         <th>Book</th>
                         {% for item in members_data %}
                         <td><a href="{% url 'member_book' selected_group.id item.membership.id %}" target="_blank" class="btn-book">Open Book</a></td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Committed Round</th>
+                        {% for item in members_data %}
+                        <td>
+                            {% if item.membership.committed_round_number %}
+                                <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:4px;font-weight:600;font-size:0.85em;">Round {{ item.membership.committed_round_number }}</span>
+                            {% else %}-{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <th>Committed Lift</th>
+                        {% for item in members_data %}
+                        <td>
+                            {% if item.membership.committed_lift_amount %}
+                                <span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-weight:600;font-size:0.85em;">₹{{ item.membership.committed_lift_amount }}</span>
+                            {% else %}-{% endif %}
+                        </td>
                         {% endfor %}
                     </tr>
                 </tbody>
