@@ -91,7 +91,7 @@ class ChitMembership(models.Model):
     class Meta:
         verbose_name = 'Chit Membership'
         verbose_name_plural = 'Chit Memberships'
-        unique_together = [['chit_group', 'slot_number'], ['chit_group', 'member']]
+        unique_together = [['chit_group', 'slot_number']]
         ordering = ['chit_group', 'slot_number']
 
 

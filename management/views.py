@@ -1,4 +1,5 @@
 import calendar
+import json
 from datetime import date
 
 from django.db import transaction
@@ -407,9 +408,13 @@ def create_group(request):
 
     return render(request, 'management/create_group.html', {
         'members': members,
+        'members_json': json.dumps([
+            {'id': m.id, 'name': m.name, 'phone': m.phone}
+            for m in members
+        ]),
         'error_message': error_message,
         'form_data': form_data,
-        'selected_member_ids': selected_member_ids,
+        'selected_member_ids_json': json.dumps(selected_member_ids),
     })
 
 
@@ -494,6 +499,28 @@ def edit_group(request, group_id):
         return redirect('dashboard_group', group_id=group.id)
     
     return render(request, 'management/edit_group.html', {'group': group})
+
+
+def delete_group(request, group_id):
+    group = get_object_or_404(ChitGroup, pk=group_id)
+    if request.method == 'POST':
+        group_name = group.name
+        with transaction.atomic():
+            # Delete in dependency order to avoid ProtectedError
+            # 1. Payments (reference ChitMembership and ChitRound)
+            Payment.objects.filter(chit_round__chit_group=group).delete()
+            # 2. Clear round winners before deleting rounds (winner FK is PROTECT on ChitMembership)
+            ChitRound.objects.filter(chit_group=group).update(winner=None)
+            # 3. Delete rounds and schedules
+            ChitRound.objects.filter(chit_group=group).delete()
+            RoundSchedule.objects.filter(chit_group=group).delete()
+            # 4. Delete memberships
+            ChitMembership.objects.filter(chit_group=group).delete()
+            # 5. Delete the group
+            group.delete()
+        messages.success(request, f"Chit group '{group_name}' deleted successfully.")
+        return redirect('dashboard')
+    return render(request, 'management/delete_group_confirm.html', {'group': group})
 
 
 def edit_members(request, group_id):
@@ -622,6 +649,48 @@ def edit_round(request, group_id, round_id):
         'group': group,
         'chit_round': chit_round,
         'memberships': memberships,
+    })
+
+
+def add_membership(request, group_id):
+    group = get_object_or_404(ChitGroup, pk=group_id)
+    members = Member.objects.filter(is_active=True).order_by('name')
+    existing_slots = set(group.memberships.values_list('slot_number', flat=True))
+    next_slot = 1
+    while next_slot in existing_slots:
+        next_slot += 1
+
+    error_message = None
+    if request.method == 'POST':
+        member_id = request.POST.get('member_id', '').strip()
+        slot_number_raw = request.POST.get('slot_number', '').strip()
+        if not member_id or not slot_number_raw:
+            error_message = 'Member and slot number are required.'
+        else:
+            try:
+                slot_number = int(slot_number_raw)
+                if slot_number < 1:
+                    raise ValueError
+            except ValueError:
+                error_message = 'Enter a valid slot number.'
+            else:
+                if slot_number in existing_slots:
+                    error_message = f'Slot {slot_number} is already occupied. Choose a different slot number.'
+                else:
+                    member = get_object_or_404(Member, pk=member_id, is_active=True)
+                    ChitMembership.objects.create(
+                        chit_group=group,
+                        member=member,
+                        slot_number=slot_number,
+                    )
+                    return redirect('edit_members', group_id=group.id)
+
+    return render(request, 'management/add_membership.html', {
+        'group': group,
+        'members': members,
+        'next_slot': next_slot,
+        'error_message': error_message,
+        'form_data': request.POST if request.method == 'POST' else {},
     })
 
 

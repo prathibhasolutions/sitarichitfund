@@ -116,42 +116,46 @@
             background: #f7f9fc;
             padding: 10px 14px;
             border-bottom: 1px solid #e8ecf1;
+            font-size: 0.88em;
+            color: #555;
         }
-        .member-toolbar button {
-            background: #2a4d7a;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 0.8em;
-            font-weight: 600;
-        }
-        .member-list {
-            max-height: 320px;
-            overflow-y: auto;
-        }
-        .member-item {
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
+        .slot-list {
             padding: 12px 14px;
-            border-bottom: 1px solid #eef2f6;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .member-item:last-child {
-            border-bottom: none;
+        .slot-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .member-item input {
-            margin-top: 3px;
-        }
-        .member-name {
+        .slot-label {
+            min-width: 58px;
             font-weight: 700;
-            color: #1a2e4a;
+            font-size: 0.82em;
+            color: #2a4d7a;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
-        .member-meta {
-            color: #666;
-            font-size: 0.84em;
-            margin-top: 2px;
+        .slot-row select {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid #bfc9d1;
+            border-radius: 6px;
+            font-size: 0.92em;
+            font-family: inherit;
+            background: #fff;
+        }
+        .slot-row select:focus {
+            outline: none;
+            border-color: #5b9aff;
+            box-shadow: 0 0 0 3px rgba(91,154,255,0.14);
+        }
+        .slot-placeholder {
+            color: #aaa;
+            font-size: 0.9em;
+            padding: 10px 14px;
         }
         .actions {
             display: flex;
@@ -281,29 +285,13 @@
                 </div>
 
                 <div class="section">
-                    <h3>Select Members</h3>
+                    <h3>Assign Members to Slots</h3>
                     <div class="member-box">
                         <div class="member-toolbar">
-                            <div>Selected: <strong id="selected-count">0</strong></div>
-                            <button type="button" onclick="toggleMembers(true)">Select All</button>
+                            Slots are generated from <strong>Total Members</strong> above. The same member can be selected for multiple slots.
                         </div>
-                        <div class="member-list">
-                            {% for member in members %}
-                            <label class="member-item">
-                                <input type="checkbox" name="member_ids" value="{{ member.id }}" {% if member.id|stringformat:'s' in selected_member_ids %}checked{% endif %} onchange="updateSelectedCount()">
-                                <div>
-                                    <div class="member-name">{{ member.name }}</div>
-                                    <div class="member-meta">{{ member.phone }} | {{ member.aadhar_number }}</div>
-                                </div>
-                            </label>
-                            {% empty %}
-                            <div class="member-item">
-                                <div>
-                                    <div class="member-name">No active members available</div>
-                                    <div class="member-meta">Create members in admin first, then come back here to build a group.</div>
-                                </div>
-                            </div>
-                            {% endfor %}
+                        <div class="slot-list" id="slot-list">
+                            <div class="slot-placeholder" id="slot-placeholder">Enter a value for Total Members above to assign slots.</div>
                         </div>
                     </div>
                 </div>
@@ -317,19 +305,60 @@
     </div>
 
     <script>
-    function updateSelectedCount() {
-        var count = document.querySelectorAll('input[name="member_ids"]:checked').length;
-        document.getElementById('selected-count').textContent = count;
+    var MEMBERS = {{ members_json }};
+    var SAVED_IDS = {{ selected_member_ids_json }};
+
+    function buildMemberOptions(selectedId) {
+        var html = '<option value="">— Select Member —</option>';
+        for (var i = 0; i < MEMBERS.length; i++) {
+            var m = MEMBERS[i];
+            var sel = (String(m.id) === String(selectedId)) ? ' selected' : '';
+            html += '<option value="' + m.id + '"' + sel + '>' + escHtml(m.name) + ' (' + escHtml(m.phone) + ')</option>';
+        }
+        return html;
     }
 
-    function toggleMembers(checked) {
-        document.querySelectorAll('input[name="member_ids"]').forEach(function (input) {
-            input.checked = checked;
-        });
-        updateSelectedCount();
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    updateSelectedCount();
+    function rebuildSlots() {
+        var n = parseInt(document.getElementById('total_members').value, 10);
+        var list = document.getElementById('slot-list');
+        var placeholder = document.getElementById('slot-placeholder');
+        // collect current selections to preserve them on resize
+        var current = Array.from(list.querySelectorAll('select[name="member_ids"]')).map(function(s){ return s.value; });
+        list.innerHTML = '';
+        if (!n || n < 1) {
+            var ph = document.createElement('div');
+            ph.className = 'slot-placeholder';
+            ph.id = 'slot-placeholder';
+            ph.textContent = 'Enter a value for Total Members above to assign slots.';
+            list.appendChild(ph);
+            return;
+        }
+        for (var i = 0; i < n; i++) {
+            var savedId = (SAVED_IDS.length > 0) ? SAVED_IDS[i] : (current[i] || '');
+            var row = document.createElement('div');
+            row.className = 'slot-row';
+            var label = document.createElement('span');
+            label.className = 'slot-label';
+            label.textContent = 'Slot ' + (i + 1);
+            var sel = document.createElement('select');
+            sel.name = 'member_ids';
+            sel.required = true;
+            sel.innerHTML = buildMemberOptions(savedId);
+            row.appendChild(label);
+            row.appendChild(sel);
+            list.appendChild(row);
+        }
+        // clear saved IDs after first restore so resize uses live values
+        SAVED_IDS = [];
+    }
+
+    document.getElementById('total_members').addEventListener('input', rebuildSlots);
+    // initial build on page load
+    rebuildSlots();
     </script>
 </body>
 </html>

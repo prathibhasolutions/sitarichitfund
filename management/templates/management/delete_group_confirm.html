@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delete {{ group.name }} - Sitari Chit Fund</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #222;
+        }
+        .container {
+            max-width: 540px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 36px 32px;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.09);
+            text-align: center;
+        }
+        .icon {
+            font-size: 2.8em;
+            margin-bottom: 16px;
+        }
+        .card h1 {
+            font-size: 1.35em;
+            color: #1a2e4a;
+            margin-bottom: 10px;
+        }
+        .card p {
+            color: #555;
+            font-size: 0.97em;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .group-name {
+            font-weight: 700;
+            color: #b42318;
+        }
+        .warning-box {
+            background: #fff8f0;
+            border: 1px solid #f5c97a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 20px 0;
+            font-size: 0.88em;
+            color: #7a4a00;
+            text-align: left;
+        }
+        .warning-box strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        .btn-delete {
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 26px;
+            font-size: 0.97em;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+        .btn-delete:hover {
+            background: #96281b;
+        }
+        .btn-cancel {
+            background: #e8ecf1;
+            color: #444;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 26px;
+            font-size: 0.97em;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+        .btn-cancel:hover {
+            background: #d0d6df;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">🗑️</div>
+            <h1>Delete Chit Group?</h1>
+            <p>You are about to permanently delete:</p>
+            <p class="group-name">{{ group.name }}</p>
+
+            <div class="warning-box">
+                <strong>⚠️ This action cannot be undone.</strong>
+                All memberships, rounds, schedules, and payments associated with this group will also be deleted.
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="actions">
+                    <button type="submit" class="btn-delete">Yes, Delete Group</button>
+                    <a href="{% url 'edit_group' group.id %}" class="btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

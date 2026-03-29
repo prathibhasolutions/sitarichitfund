@@ -132,6 +132,14 @@
         .btn-cancel:hover {
             background: #d8dde5;
         }
+        .btn-delete {
+            background: #c0392b;
+            color: #fff;
+            margin-left: auto;
+        }
+        .btn-delete:hover {
+            background: #96281b;
+        }
 
         .help-text {
             font-size: 0.75em;
@@ -259,6 +267,7 @@
                 <div class="button-group">
                     <button type="submit" class="btn btn-save">💾 Save Changes</button>
                     <a href="{% url 'dashboard_group' group.id %}" class="btn btn-cancel">Cancel</a>
+                    <a href="{% url 'delete_group' group.id %}" class="btn btn-delete">🗑️ Delete Group</a>
                 </div>
             </form>
         </div>

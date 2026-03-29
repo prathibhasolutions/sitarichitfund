@@ -134,7 +134,10 @@
     <div class="container">
         <div class="header">
             <h1>Edit Members - {{ group.name }}</h1>
-            <a href="{% url 'dashboard_group' group.id %}">← Back to Dashboard</a>
+            <div style="display:flex;gap:12px;align-items:center;">
+                <a href="{% url 'add_membership' group.id %}" class="btn-edit" style="padding:7px 16px;font-size:0.85em;color:#fff;">+ Add Slot</a>
+                <a href="{% url 'dashboard_group' group.id %}">← Back to Dashboard</a>
+            </div>
         </div>
 
         {% if memberships %}
